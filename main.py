@@ -43,7 +43,7 @@ def run():
 								   sdl2.SDL_WINDOWPOS_CENTERED,
 								   sdl2.SDL_WINDOWPOS_CENTERED, 
 								   windowWidth, windowHeight,
-								   sdl2.SDL_WINDOW_OPENGL | sdl2.SDL_WINDOW_RESIZABLE )
+								   sdl2.SDL_WINDOW_OPENGL )
 	if not window:
 		print(sdl2.SDL_GetError())
 		return -1
@@ -68,14 +68,14 @@ def run():
 	imageArray = np.array( image )
 	imageWidth = imageArray.shape[1]
 	imageHeight = imageArray.shape[0]
-	aspectRatio = imageWidth/imageHeight
+	imageAspectRatio = imageWidth/imageHeight
 	numChannels = imageArray.shape[2]
 
 	print( 'Image Info:' )
 	print( f'	image path = {imagePath}' )
 	print( f'	image width = {imageWidth}' )
 	print( f'	image height = {imageHeight}' )
-	print( f'	image aspect ratio = {aspectRatio}' )
+	print( f'	image aspect ratio = {imageAspectRatio}' )
 	print( f'	image num channels = {numChannels}' )
 	print( f'	image data type = {imageArray.dtype}' )
 
@@ -109,6 +109,47 @@ def run():
 
 
 	#
+	#	Setup scene
+	#
+ 
+	print( 'scene info:' )
+	print( f'	window dimension = ( {windowWidth}, {windowHeight} )' )
+	print( f'	image dimension = ( {imageWidth}, {imageHeight} )' )
+	
+	windowAspectRatio = windowWidth/windowHeight
+	print( f'	window aspect ratio = {windowAspectRatio}' )
+
+	# compute 1-1
+	zoomFactor_x = windowWidth / imageWidth
+	zoomFactor_y = windowHeight / imageHeight
+
+	print( f'	zoomFactor x (1 to 1) = {zoomFactor_x}' )
+	print( f'	zoomFactor y (1 to 1) = {zoomFactor_y}' )
+
+	# find out min of zoom factor
+	zoomFactor = min( zoomFactor_x, zoomFactor_y )
+	print( f'	min zoomFactor = {zoomFactor}' )
+	
+	# compute for scale matrix
+	scaleFactor = windowAspectRatio/imageAspectRatio
+	print( f'	scaleFactor ( windowAspectRatio/imageAspectRatio ) = {scaleFactor}' )
+
+	# scale matrix
+	scaleMatrix = Transform3D.scale( 1, scaleFactor, 1 )
+
+	# ortho matrix
+	ortho = Transform3D.ortho( 	0, imageWidth, 
+								0, imageHeight,
+								-1, 1 )
+	
+	# scale in image space
+	scaleImageFactor = 0.9
+	scaleImage = Transform3D.scale( scaleImageFactor, scaleImageFactor, 1 )
+
+	# compute transform for project image
+	projectionTransform = scaleImage * scaleMatrix * ortho
+	
+	#
 	#	Setup vertex
 	#
 
@@ -131,10 +172,10 @@ def run():
 
 	vertexData = np.array([
 	# Vertex Positions			# color			# uv
-		l, b, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-		l, t, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-		r, t, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0,
-		r, b, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0,
+		l, b, 0.0, 1.0, 		1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+		l, t, 0.0, 1.0, 		0.0, 1.0, 0.0, 1.0, 0.0, 1.0,
+		r, t, 0.0, 1.0, 		0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+		r, b, 0.0, 1.0, 		1.0, 0.0, 1.0, 1.0, 1.0, 0.0,
 
 	], dtype=np.float32)
 	indicesData = np.array( [ 0, 1, 2, 2, 3, 0 ], dtype=np.uint32 )
@@ -230,9 +271,8 @@ def run():
 		# get model, view and project location
 		model_m4 = Matrix4()
 		view_m4 = Matrix4()
-		projection_m4 = Transform3D.ortho( 	0, imageWidth, 
-											0, imageHeight,
-											 -1, 1 )
+		projection_m4 = projectionTransform
+
 		shaderProgram.setMat4( "model", model_m4 )
 		shaderProgram.setMat4( "view", view_m4 )
 		shaderProgram.setMat4( "projection", projection_m4 )

@@ -27,7 +27,8 @@ void main()
 	// compute mvp
 	mat4 mvp = projection * view * model;
 
-	gl_Position = mvp * position;
+	vec4 finalPos = mvp * position;
+	gl_Position = finalPos;
 	outColorF = inColor;
 	texCoord = inTexCoord;
 }

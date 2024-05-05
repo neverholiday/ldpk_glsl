@@ -188,8 +188,9 @@ class Matrix4:
 	def __mul__( self, other ):
 		if isinstance( other, Vector4 ):
 			return self.m @ other.v
-		return self.m @ other.m
-		
-		
+		ndarray = self.m @ other.m
+		m = Matrix4()
+		m.m = ndarray
+		return m
 	
 	

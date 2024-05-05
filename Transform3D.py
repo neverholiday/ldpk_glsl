@@ -30,6 +30,21 @@ class Transform3D:
 									0,		0,			-2/(f-n),	-((f+n)/(f-n)),
 									0,		0,			0,			1 )
 		
+	@staticmethod
+	def scale( scaleX:float, scaleY:float, scaleZ:float ):
+		'''	compute scale matrix
+		'''
+
+		# for alias
+		sx = scaleX
+		sy = scaleY
+		sz = scaleZ
+
+		return Matrix4.fromArgs( 	sx, 0, 0, 0,
+						  		 	0, sy, 0, 0,
+									0, 0, sz, 0,
+									0, 0, 0, 1 )
+
 
 
 
