@@ -13,6 +13,38 @@ class Matrix4:
 
 	def __repr__( self ):
 		return str( self.m )
+	
+	@classmethod
+	def fromArgs( cls, x1, x2, x3, x4,
+			  			y1, y2, y3, y4,
+			  			z1, z2, z3, z4,
+			  			w1, w2, w3, w4, ):
+		
+		# construct matrix
+		m = cls()
+
+		# assign value to each index
+		m.x1 = x1
+		m.y1 = y1
+		m.z1 = z1
+		m.w1 = w1
+
+		m.x2 = x2
+		m.y2 = y2
+		m.z2 = z2
+		m.w2 = w2
+		
+		m.x3 = x3
+		m.y3 = y3
+		m.z3 = z3
+		m.w3 = w3
+
+		m.x4 = x4
+		m.y4 = y4
+		m.z4 = z4
+		m.w4 = w4
+
+		return m
 
 	@property
 	def x1( self ):

@@ -3,6 +3,8 @@
 from OpenGL import GL
 from OpenGL.GL import shaders
 
+from Matrix4 import Matrix4
+
 class ShaderProgram:
 
 	VertexShader = \
@@ -76,12 +78,12 @@ void main()
 		'''
 		GL.glUseProgram( self.shaderProgram )
 
-	def setMat4( self, attrName:str, matrix4 ):
+	def setMat4( self, attrName:str, matrix4:Matrix4 ):
 		'''	set uniform attribute, matrix 4 to shader program
 		'''
 
 		GL.glUniformMatrix4fv(  GL.glGetUniformLocation( self.shaderProgram, attrName ), 
 									1, 
 									GL.GL_FALSE, 
-									matrix4.T )
+									matrix4.m.T )
 		

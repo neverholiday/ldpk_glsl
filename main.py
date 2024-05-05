@@ -1,20 +1,36 @@
 #!/usr/bin/env python3
 
+####################################################################
+#
+#	Standard Import
+#
+
 import sys
 import ctypes
 import numpy as np
 
-from OpenGL import GL
-
 import sdl2
 from sdl2 import video
 
+from OpenGL import GL
 from PIL import Image
 
+####################################################################
 #
 #	Local Import
 #
+
+# shader program
 from ShaderProgram import ShaderProgram
+
+# matrix
+from Matrix4 import Matrix4
+from Transform3D import Transform3D
+
+####################################################################
+#
+#	Main Import
+#
 
 def run():
 	if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO) != 0:
@@ -212,9 +228,11 @@ def run():
 
 		# set mvp for this object
 		# get model, view and project location
-		model_m4 = np.identity( 4 )
-		view_m4 = np.identity( 4 )
-		projection_m4 = np.identity( 4 )
+		model_m4 = Matrix4()
+		view_m4 = Matrix4()
+		projection_m4 = Transform3D.ortho( 	0, imageWidth, 
+											0, imageHeight,
+											 -1, 1 )
 		shaderProgram.setMat4( "model", model_m4 )
 		shaderProgram.setMat4( "view", view_m4 )
 		shaderProgram.setMat4( "projection", projection_m4 )
