@@ -1,5 +1,8 @@
 # to download image:
+# with wget
 wget -P image/ https://media.xiph.org/tearsofsteel/tearsofsteel-1080-png/graded_edit_final_05535.png
+# or curl
+curl -o image/graded_edit_final_05535.png https://media.xiph.org/tearsofsteel/tearsofsteel-1080-png/graded_edit_final_05535.png
 
 # test read image
 ./test_scripts/test_read_image.py
