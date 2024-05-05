@@ -5,55 +5,16 @@ import ctypes
 import numpy as np
 
 from OpenGL import GL
-from OpenGL.GL import shaders
 
 import sdl2
 from sdl2 import video
 
 from PIL import Image
 
-VERTEX_SHADER = \
-"""
-#version 330 core
-layout (location=0) in vec4 position;
-layout (location=1) in vec4 inColor;
-layout (location=2) in vec2 inTexCoord;
-
-// uniform transform
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-out vec4 outColorF;
-out vec2 texCoord;
-void main()
-{
-
-	// compute mvp
-	mat4 mvp = projection * view * model;
-
-	gl_Position = mvp * position;
-	outColorF = inColor;
-	texCoord = inTexCoord;
-}
-"""
-
-FRAGMENT_SHADER = \
-"""
-#version 330 core
-in vec4 outColorF;
-in vec2 texCoord;
-
-out vec4 outColor;
-
-// texture uniform attribute
-uniform sampler2D texture1;
-
-void main()
-{
-	outColor = texture( texture1, texCoord );
-}
-"""
+#
+#	Local Import
+#
+from ShaderProgram import ShaderProgram
 
 def run():
 	if sdl2.SDL_Init(sdl2.SDL_INIT_VIDEO) != 0:
@@ -79,13 +40,9 @@ def run():
 		video.SDL_GL_CONTEXT_PROFILE_CORE)
 	context = sdl2.SDL_GL_CreateContext(window)
 
-	# Setup GL shaders program
-	shaderProgram = None
-
-	# compile shader program
-	vertexShader = shaders.compileShader( VERTEX_SHADER, GL.GL_VERTEX_SHADER )
-	fragmentShader = shaders.compileShader( FRAGMENT_SHADER, GL.GL_FRAGMENT_SHADER )
-	shaderProgram = shaders.compileProgram( vertexShader, fragmentShader, validate=False )
+	# construct shader program and compile
+	shaderProgram = ShaderProgram()
+	shaderProgram.compile()
 
 	#
 	#	Read image
@@ -144,10 +101,11 @@ def run():
 	VBO = None
 	EBO = None
 
-	l = -1
-	r = 1
-	b = -1
-	t = 1
+	# rect position
+	l = 0
+	r = imageWidth
+	b = 0
+	t = imageHeight
 
 	print( 'vertex info' )
 	print( f'	left = {l}' )
@@ -248,7 +206,7 @@ def run():
 		#
 
 		# active shader program
-		GL.glUseProgram(shaderProgram)
+		shaderProgram.use()
 		GL.glBindTexture( GL.GL_TEXTURE_2D, texture )
 		GL.glBindVertexArray(VAO)
 
@@ -257,18 +215,9 @@ def run():
 		model_m4 = np.identity( 4 )
 		view_m4 = np.identity( 4 )
 		projection_m4 = np.identity( 4 )
-		GL.glUniformMatrix4fv(  GL.glGetUniformLocation( shaderProgram, "model" ), 
-								1, 
-								GL.GL_FALSE, 
-								model_m4.T )
-		GL.glUniformMatrix4fv(  GL.glGetUniformLocation( shaderProgram, "view" ), 
-								1, 
-								GL.GL_FALSE, 
-								view_m4.T )
-		GL.glUniformMatrix4fv(  GL.glGetUniformLocation( shaderProgram, "projection" ), 
-								1, 
-								GL.GL_FALSE, 
-								projection_m4.T )
+		shaderProgram.setMat4( "model", model_m4 )
+		shaderProgram.setMat4( "view", view_m4 )
+		shaderProgram.setMat4( "projection", projection_m4 )
 		
 		# draw triangle
 		GL.glDrawElements( GL.GL_TRIANGLES, len(indicesData), GL.GL_UNSIGNED_INT, None )
